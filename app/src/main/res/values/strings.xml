@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">weather_app</string>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize the color of the status bar (title bar) -->
+        <item name="android:statusBarColor">@color/Teal</item>
+    </style>
+
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
