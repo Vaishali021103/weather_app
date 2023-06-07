@@ -29,6 +29,7 @@ import android.location.Geocoder
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var geocoder: Geocoder
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -41,7 +42,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
         }
-        getLastKnownLocation()
 
 
         val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
@@ -76,10 +76,10 @@ class MainActivity : AppCompatActivity() {
                     val addresses = geocoder.getFromLocation(latitude, longitude, 1)
                     if (addresses?.isNotEmpty() == true){
                         val addresses = addresses[0]
-                        val placeName = addresses.getAddressLine(0)
+//                        val placeName = addresses.getAddressLine(0)
                         val locn = findViewById<TextView>(R.id.location)
-//                        val formattedAddress = formatAddress(addresses)
-                        locn.text = placeName
+                        val formattedAddress = formatAddress(addresses)
+                        locn.text = formattedAddress
 
                     }
                     else{
@@ -94,9 +94,20 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this,"Failureee",Toast.LENGTH_SHORT).show()
             }
     }
+    private fun formatAddress(addresses: Address):String {
+        val stringBuilder = StringBuilder()
+        val addressLineCount = addresses.maxAddressLineIndex + 1
+        for (i in 0 until addressLineCount) {
+            stringBuilder.append(addresses.getAddressLine(i))
+            if (i < addressLineCount - 1) {
+                stringBuilder.append(", ")
+            }
+        }
+        return stringBuilder.toString()
+    }
 
     private fun getWeatherData(latitude: Double, longitude: Double) {
-        val apiKey = "447c74d353ece1818c9a34f575fc5138" // Replace with your actual API key
+        val apiKey = "62fa0f3f1d8105534a3605af3bf67cae" // Replace with your actual API key
         val weatherApiClient = WeatherApiClient()
         val weatherService = weatherApiClient.getWeatherService()
 
@@ -132,4 +143,24 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted, perform the operation
+                    getLastKnownLocation()
+                } else {
+                    // Permission denied, handle accordingly (e.g., show a message, disable functionality)
+                    // ...
+                }
+            }
+        }
+    }
+
 }
