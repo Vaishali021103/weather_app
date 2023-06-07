@@ -29,6 +29,7 @@ import android.location.Geocoder
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var geocoder: Geocoder
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -41,7 +42,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
         }
-        getLastKnownLocation()
 
 
         val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getWeatherData(latitude: Double, longitude: Double) {
-        val apiKey = "447c74d353ece1818c9a34f575fc5138" // Replace with your actual API key
+        val apiKey = "62fa0f3f1d8105534a3605af3bf67cae" // Replace with your actual API key
         val weatherApiClient = WeatherApiClient()
         val weatherService = weatherApiClient.getWeatherService()
 
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     // Handle API error
-                    Toast.makeText(this@MainActivity,"Error",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity,"Errorrrr",Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -131,5 +131,30 @@ class MainActivity : AppCompatActivity() {
                 // Handle network failure or request cancellation
             }
         })
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted, perform the operation
+                    getLastKnownLocation()
+                } else {
+                    // Permission denied, handle accordingly (e.g., show a message, disable functionality)
+                    // ...
+                }
+            }
+        }
+    }
+
+
+    private fun performOperation() {
+        // Place your code here to perform the operation after obtaining permission
+        // ...
     }
 }
