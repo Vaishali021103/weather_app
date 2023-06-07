@@ -9,8 +9,8 @@ import com.google.android.material.tabs.TabLayoutMediator
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Location
-import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -19,17 +19,21 @@ import com.google.android.gms.location.LocationServices
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.logging.Logger
+import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.*
+import android.location.Geocoder
 
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var in_degree:TextView
+    private lateinit var geocoder: Geocoder
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        in_degree=findViewById(R.id.indegree)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        geocoder = Geocoder(this, Locale.getDefault())
 
         // Check location permission
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
         }
+        getLastKnownLocation()
 
 
         val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
@@ -67,9 +72,21 @@ class MainActivity : AppCompatActivity() {
                 location?.let {
                     val latitude = location.latitude
                     val longitude = location.longitude
+
+                    val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+                    if (addresses?.isNotEmpty() == true){
+                        val addresses = addresses[0]
+                        val placeName = addresses.getAddressLine(0)
+                        val locn = findViewById<TextView>(R.id.location)
+//                        val formattedAddress = formatAddress(addresses)
+                        locn.text = placeName
+
+                    }
+                    else{
+                        val locn = findViewById<TextView>(R.id.location)
+                        locn.text = "Place name not found"
+                    }
                     // Call the weather API with retrieved coordinates
-                    Log.i("latitude",latitude.toString())
-                    Log.i("longitude",longitude.toString())
                     getWeatherData(latitude, longitude)
                 }
             }
@@ -91,14 +108,18 @@ class MainActivity : AppCompatActivity() {
                     // Handle the weather data and update your UI
                     weatherResponse?.let {
                         val temp = findViewById<TextView>(R.id.indegree)
-                        temp.text = weatherResponse.main.temp.toString()
-                        val humidity = weatherResponse.main.humidity
-                        val weatherDescription = weatherResponse.weather[0].description
-                        print("temp $temp")
-                        Log.i("Taggg",temp.toString())
-                        Log.i("weatherResponse",weatherResponse.toString())
+                        val decimalFormat = DecimalFormat("#.##")
+                        val temp2 = (weatherResponse.main.temp - 273.15)
+                        val formattedtemp =decimalFormat.format((temp2))
+                        temp.text = formattedtemp.toString()
+//                        val humidity = weatherResponse.main.humidity
+//                        val weatherDescription = weatherResponse.weather[0].description
                         // Update UI with weather details
-
+                        val date = findViewById<TextView>(R.id.date)
+                        val calendar = Calendar.getInstance()
+                        val dateFormat = SimpleDateFormat("EEE, MMMM dd, yyyy", Locale.getDefault())
+                        val formattedDate = dateFormat.format(calendar.time)
+                        date.text = formattedDate.toString()
                     }
                 } else {
                     // Handle API error
