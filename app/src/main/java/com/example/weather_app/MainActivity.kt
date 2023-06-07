@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getWeatherData(latitude: Double, longitude: Double) {
-        val apiKey = "62fa0f3f1d8105534a3605af3bf67cae  " // Replace with your actual API key
+        val apiKey = "62fa0f3f1d8105534a3605af3bf67cae" // Replace with your actual API key
         val weatherApiClient = WeatherApiClient()
         val weatherService = weatherApiClient.getWeatherService()
 
